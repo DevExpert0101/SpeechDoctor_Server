@@ -15,7 +15,7 @@ import time
 model = whisper.load_model("small")
 
 model_path = "vosk-model-en-us-0.22"
-# model_vosk = Model(model_path) 
+model_vosk = Model(model_path) 
 filter_words = ['well','oh', 'um' 'er' ,'ah', 'uh', 'hmm', 'like', 'actually', 'basically', 'seriously', 'literally', 'totally', 'clearly', 'you see', 'you know'
     , 'i mean', 'you know what I mean','yeah', 'at the end of the day', 'believe me', 'i guess' , 'i suppose', 'or something', 'okay' , 'so', 'right' , 'hmm' , 'uh' ,'huh']
 
@@ -112,91 +112,91 @@ def process_audio(file_path: str):
     audio_filename = fname + "_resampled_mono.wav"
 
 
-    # wf = wave.open(audio_filename, "rb")
-    # rec = KaldiRecognizer(model_vosk, wf.getframerate())
-    # rec.SetWords(True)
+    wf = wave.open(audio_filename, "rb")
+    rec = KaldiRecognizer(model_vosk, wf.getframerate())
+    rec.SetWords(True)
 
-    # # get the list of JSON dictionaries
-    # results = []
+    # get the list of JSON dictionaries
+    results = []
 
-    # # recognize speech using vosk model
-    # while True:
-    #     data = wf.readframes(4000)
-    #     if len(data) == 0:
-    #         break
-    #     if rec.AcceptWaveform(data):
-    #         part_result = json.loads(rec.Result())
-    #         results.append(part_result)
-    # part_result = json.loads(rec.FinalResult())
-    # results.append(part_result)
+    # recognize speech using vosk model
+    while True:
+        data = wf.readframes(4000)
+        if len(data) == 0:
+            break
+        if rec.AcceptWaveform(data):
+            part_result = json.loads(rec.Result())
+            results.append(part_result)
+    part_result = json.loads(rec.FinalResult())
+    results.append(part_result)
 
-    # # convert list of JSON dictionaries to list of 'Word' objects
-    # list_of_Words = []
-    # for sentence in results:
-    #     if len(sentence) == 1:
-    #         # sometimes there are bugs in recognition
-    #         # and it returns an empty dictionary
-    #         # {'text': ''}
-    #         continue
-    #     for obj in sentence['result']:
-    #         w = Word(obj)  # create custom Word object
-    #         list_of_Words.append(w)  # and add it to list
+    # convert list of JSON dictionaries to list of 'Word' objects
+    list_of_Words = []
+    for sentence in results:
+        if len(sentence) == 1:
+            # sometimes there are bugs in recognition
+            # and it returns an empty dictionary
+            # {'text': ''}
+            continue
+        for obj in sentence['result']:
+            w = Word(obj)  # create custom Word object
+            list_of_Words.append(w)  # and add it to list
 
-    # wf.close()  # close audiofile
+    wf.close()  # close audiofile
 
-    # # output to the screen
+    # output to the screen
 
-    # word_num = len(list_of_Words)
-    # json_words = []
-    # for word in list_of_Words:
-    #     # print(word.to_string())
-    #     json_words.append({'start': word.start, 'end': word.end, 'word': word.word})
+    word_num = len(list_of_Words)
+    json_words = []
+    for word in list_of_Words:
+        # print(word.to_string())
+        json_words.append({'start': word.start, 'end': word.end, 'word': word.word})
 
-    # print(json_words)     
+    print(json_words)     
 
-    # word_num = len(list_of_Words)
-    # json_words = []
-    # for word in list_of_Words:
-    #     # print(word.to_string())
-    #     json_words.append({'start': word.start, 'end': word.end, 'word': word.word})
+    word_num = len(list_of_Words)
+    json_words = []
+    for word in list_of_Words:
+        # print(word.to_string())
+        json_words.append({'start': word.start, 'end': word.end, 'word': word.word})
 
-    # print("The number of words is : ", len(json_words))
+    print("The number of words is : ", len(json_words))
 
-    # json_words_data = json.dumps(json_words)
-    # with open('words_json_data_final.json', 'w') as outfile:
-    #     outfile.write(json_words_data)
+    json_words_data = json.dumps(json_words)
+    with open('words_json_data_final.json', 'w') as outfile:
+        outfile.write(json_words_data)
 
-    # pause = []
-    # for i in range(len(list_of_Words) - 1):
-    #     word = list_of_Words[i]
-    #     next_word = list_of_Words[i + 1]
-    #     if word.end < next_word.start - 0.5:
-    #         pause.append({'start': word.end, 'end': next_word.start})
+    pause = []
+    for i in range(len(list_of_Words) - 1):
+        word = list_of_Words[i]
+        next_word = list_of_Words[i + 1]
+        if word.end < next_word.start - 0.5:
+            pause.append({'start': word.end, 'end': next_word.start})
 
-    # num_pause = len(pause)
-    # print("The number of puases is : ", len(pause))
+    num_pause = len(pause)
+    print("The number of puases is : ", len(pause))
     
 
-    # json_pause_data = json.dumps(pause)
-    # with open('pause_json_data_Gujrati_en.json', 'w') as outfile:
-    #     outfile.write(json_pause_data)
+    json_pause_data = json.dumps(pause)
+    with open('pause_json_data_Gujrati_en.json', 'w') as outfile:
+        outfile.write(json_pause_data)
 
     
     
-    # filtered_words = []
-    # for word in list_of_Words:
-    #     w = word.to_string().split()
-    #     if w[0].lower() in filter_words:
-    #         print(word.to_string())
-    #         filtered_words.append({'start': word.start, 'end': word.end, 'filtered_word': word.word})
+    filtered_words = []
+    for word in list_of_Words:
+        w = word.to_string().split()
+        if w[0].lower() in filter_words:
+            print(word.to_string())
+            filtered_words.append({'start': word.start, 'end': word.end, 'filtered_word': word.word})
 
-    # num_filtered_words = len(filtered_words)
-    # print("The number of filtered words : ", num_filtered_words)
+    num_filtered_words = len(filtered_words)
+    print("The number of filtered words : ", num_filtered_words)
     
 
-    # json_filtered_data = json.dumps(filtered_words)
-    # with open('filtered_json_data_Gujrati_en.json', 'w') as outfile:
-    #     outfile.write(json_filtered_data)
+    json_filtered_data = json.dumps(filtered_words)
+    with open('filtered_json_data_Gujrati_en.json', 'w') as outfile:
+        outfile.write(json_filtered_data)
 
 
     end_time = time.time() - start_time
