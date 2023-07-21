@@ -200,7 +200,7 @@ def process_audio(file_path: str):
 
 
     end_time = time.time() - start_time
-    return json_sentence_data, end_time#, json_words, json_pause_data, json_filtered_data, end_time
+    return json_sentence_data, json_words, json_pause_data, json_filtered_data, end_time
 
 @app.post("/upload/audio/")
 async def upload_audio_file(file: UploadFile = File(...)):
