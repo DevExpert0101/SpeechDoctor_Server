@@ -50,7 +50,7 @@ class AudioProcessResult(BaseModel):
 
 def process_audio(file_path: str):
     
-    start_time = time.time()
+    start_ = time.time()
 
     fname = file_path.split('.')[0]
     # print(fname)
@@ -199,8 +199,9 @@ def process_audio(file_path: str):
         outfile.write(json_filtered_data)
 
 
-    end_time = time.time() - start_time
-    return json_sentence_data, json_words, json_pause_data, json_filtered_data, end_time
+    end_ = time.time() - start_
+    print("--- %s seconds ---" % end_)
+    return json_sentence_data, json_words, json_pause_data, json_filtered_data, end_
 
 @app.post("/upload/audio/")
 async def upload_audio_file(file: UploadFile = File(...)):
