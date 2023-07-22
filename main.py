@@ -55,9 +55,9 @@ def process_audio(file_path: str):
     fname = file_path.split('.')[0]
     # print(fname)
     src = file_path
-    dst = file_path.replace('mp3', 'wav')
-    sound = AudioSegment.from_mp3(src)
-    sound.export(dst, format="wav")
+    dst = file_path#.replace('mp3', 'wav')
+    # sound = AudioSegment.from_mp3(src)
+    # sound.export(dst, format="wav")
 
     # Load the original audio file
     audio, original_sample_rate = sf.read(dst)
