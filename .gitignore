@@ -3,3 +3,4 @@ whisper/
 __pycache__/
 vosk-model-en-us-0.22.zip
 myenv/
+*.m4a
