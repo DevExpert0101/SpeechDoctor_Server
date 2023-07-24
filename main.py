@@ -85,6 +85,9 @@ def process_audio(folder_path: str, file_name: str):
     sound.export(folder_path + "/" + fname + "_resampled_mono.wav", format="wav")
 
     result = model.transcribe(folder_path + "/" + fname + "_resampled_mono.wav")
+
+    print('*'*30)
+    print(result['text'])
     # print(result['text'])
     sentences = []
     json_sentence = []
