@@ -311,7 +311,6 @@ async def signup(userinfo: UserInfo):
                                              password='',
                                              port='3310')
 
-
         if connection.is_connected():
             cursor = connection.cursor(buffered=True)
             cursor.execute("select database();")
