@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, Request
 from pydantic import BaseModel
 from typing import List
 from pydub import AudioSegment
@@ -11,6 +11,9 @@ from vosk import Model, KaldiRecognizer, SetLogLevel
 import time
 import os
 import datetime
+import mysql.connector
+from mysql.connector import Error
+import re
 
 
 # available models = ['tiny.en', 'tiny', 'base.en', 'base', 'small.en', 'small', 'medium.en', 'medium', 'large-v1', 'large-v2', 'large']
@@ -237,3 +240,147 @@ async def upload_audio_file(file: UploadFile = File(...)):
     # Return the processing result
     # return AudioProcessResult(filename=file.filename, duration_seconds=duration_seconds)
     return sentence_json
+
+
+class Category(BaseModel):
+    category: str
+
+class UserInfo(BaseModel):
+    phone: str
+    email: str
+    categories: List[Category]
+
+# @app.post("/getinfo/")
+# async def getinfofromdb(item: Item):
+#     try:
+#         connection = mysql.connector.connect(host='localhost',
+#                                             database='speechdoctordb',
+#                                             user='root',
+#                                             password='',
+#                                             port='3310')
+#         if connection.is_connected():
+#             db_Info = connection.get_server_info()
+#             print("Connected to MySQL Server version ", db_Info)
+#             cursor = connection.cursor(buffered=True)
+#             cursor.execute("select database();")
+#             record = cursor.fetchone()
+#             print("You're connected to database: ", record)
+
+#             # cursor = connection.cursor(buffered=True)
+            
+#             rlt = cursor.execute(f"Select * From userinfo WHERE {item.id} = userinfo.id")
+#             record = cursor.fetchall()
+#             print(record)
+
+#             return record
+
+#     except Error as e:
+#         print("Error while connecting to MySQL", e)
+#     finally:
+#         if connection.is_connected():
+#             cursor.close()
+#             connection.close()
+#             print("MySQL connection is closed")
+
+def is_valid_email(email):
+    email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+    return re.match(email_pattern, email)
+
+def is_valid_phone(phone):
+    phone_pattern = r"^\d{10}$"  # Assumes a 10-digit phone number format
+    return re.match(phone_pattern, phone)
+
+
+@app.post("/signup/")
+async def signup(userinfo: UserInfo):
+    try:
+        
+        user_phone = userinfo.phone
+        user_email = userinfo.email
+        categories = userinfo.categories
+
+        if is_valid_email(user_email) == None:
+            return 'Invalid email format.'
+        elif is_valid_phone(user_phone) == None:
+            return 'Invalid phone number format'
+        
+
+        connection = mysql.connector.connect(host='localhost',
+                                             database='speechdoctordb',
+                                             user='root',
+                                             password='',
+                                             port='3310')
+
+
+        if connection.is_connected():
+            cursor = connection.cursor(buffered=True)
+            cursor.execute("select database();")
+            record = cursor.fetchone()
+
+            # Look for the email or phone number already exists in db
+            lookup_phone_rlt = cursor.execute(f"Select id From userinfo WHERE {user_phone} = phone;")
+            lookup_phone_rlt = cursor.fetchone()
+            if lookup_phone_rlt != None:
+                print("Looked up phone number's id: ", lookup_phone_rlt[0])
+                return 'User phone number is already exists'
+            
+
+            lookup_email_rlt = cursor.execute(f"SELECT id FROM userinfo WHERE '{user_email}' = email;")
+            lookup_email_rlt = cursor.fetchone()
+
+            questions = []                    
+
+            if lookup_email_rlt != None:
+                print("Looked up email's id: ", lookup_email_rlt[0])
+                return 'User email is already exists'
+            
+            else:
+                insert_query = "INSERT INTO userinfo (phone, email) VALUES ( %s, %s)"
+                values = ( user_phone, user_email)
+                signup_rlt = cursor.execute(insert_query, values)
+                signup_rlt = connection.commit()
+                print('Successfully registered.')
+
+                user_id = cursor.execute(f"SELECT id From userinfo WHERE '{user_email}' = email;")
+                user_id = cursor.fetchone()
+                insert_query = "INSERT INTO user_category (user_id, category_id) VALUES (%s, %s)"
+                
+                category_ids = []
+                for category in categories:
+                    
+                    category_id = cursor.execute(f"SELECT id FROM categories WHERE '{category.category}' = category;")
+                    category_id = cursor.fetchone()                    
+                    values = (user_id[0], category_id[0])
+
+                    print(values)
+
+                    category_ids.append(category_id[0])
+
+                    insert_category_rlt = cursor.execute(insert_query, values)
+                    insert_category_rlt = connection.commit()
+
+                
+                    # query = "SELECT DISTINCT question_id FROM category_question WHERE category_id IN ({})".format(', '.join(map(str, category_ids)))
+                    query = f"SELECT DISTINCT question_id FROM category_question WHERE category_id = '{category_id[0]}'"
+                    cursor.execute(query)
+                    question_ids = [row[0] for row in cursor.fetchall()]
+
+                    print('question ids: ', question_ids)
+
+                    
+                    for question_id in question_ids:
+                        print(category.category, ',', question_id)
+                        query = f"SELECT question FROM questions WHERE category='{category.category}' AND question_id={question_id};"
+                        cursor.execute(query)
+                        questions.append(cursor.fetchone()[0])
+
+                print(questions)
+                return {"result":"Successfully registered", "quesitons": questions}
+            
+    except Error as e:
+        print("Error while connecting to MYSQL :", e)
+    finally:
+        if 'connection' in locals() and connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("MySQL connection is closed")

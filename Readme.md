@@ -14,3 +14,13 @@ uvicorn main:app --host 0.0.0.0 --port 8080
 
 ## IP address for DigitalOcean Droplet instance
 67.205.185.110
+
+## Make uvicron app as a linux service
+https://blog.miguelgrinberg.com/post/running-a-flask-application-as-a-service-with-systemd
+
+## Database
+
+Name : SpeechDoctorDB
+user : root
+
+Tables : Category(id, category), Category_Question(category_id, question_id), UserInfo(id, phone, email), User_Category(user_id, category_id)
