@@ -386,19 +386,23 @@ async def signin(userinfo: UserInfo):
 
             cursor.execute(f"SELECT id from userinfo WHERE {user_phone}=phone AND '{user_email}'=email")
             user_id = cursor.fetchone()
+            print('user_id', user_id)
 
             cursor.execute(f"SELECT category_id FROM user_category WHERE {user_id[0]}=user_id;")
             category_ids = cursor.fetchall()
-
+            print('category_ids', category_ids)
 
             questions = []
             for category_id in category_ids:
 
                 cursor.execute(f"SELECT DISTINCT question_id FROM category_question WHERE category_id='{category_id[0]}';")
                 question_ids = [row[0] for row in cursor.fetchall()]
+                print('question ids', question_ids)
 
                 cursor.execute(f"SELECT category FROM categoreis WHERE id={category_id}")
                 category = cursor.fetchone()[0]
+
+                print('category', category)
 
                 for question_id in question_ids:
                     cursor.execute(f"SELECT question FROM questions WHERE category='{category}' AND question_id={question_id};")
