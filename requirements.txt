@@ -6,3 +6,4 @@ vosk
 soundfile
 scipy
 python-multipart
+mysql-connector-python
