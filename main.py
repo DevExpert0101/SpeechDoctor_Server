@@ -369,7 +369,7 @@ async def signin(userinfo: UserInfo):
             return {"result":'Invalid phone number format'}
 
 
-        connection = mysql.connector.connect(host='db-mysql-nyc1-26789-do-user-9891847-0.b.db.ondigitalocean.com',
+        connection = mysql.connector.connect(host='private-db-mysql-nyc1-26789-do-user-9891847-0.b.db.ondigitalocean.com',
                                              database='speechdoctordb',
                                              user='doadmin',
                                              password='AVNS_KlICjZwsR1t_bOfnX4V',
