@@ -378,6 +378,7 @@ async def signin(userinfo: UserInfo):
         if connection.is_connected():
             cursor = connection.cursor(buffered=True)
             cursor.execute("select database();")
+            cursor.fetchone()
 
             cursor.execute(f"SELECT id from userinfo WHERE {user_phone}=phone AND '{user_email}'=email")
             user_id = cursor.fetchone()
