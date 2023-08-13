@@ -399,7 +399,7 @@ async def signin(userinfo: UserInfo):
                 question_ids = [row[0] for row in cursor.fetchall()]
                 print('question ids', question_ids)
 
-                cursor.execute(f"SELECT category FROM categoreis WHERE id={category_id[0]}")
+                cursor.execute(f"SELECT category FROM categories WHERE id={category_id[0]}")
                 category = cursor.fetchone()[0]
 
                 print('category', category)
