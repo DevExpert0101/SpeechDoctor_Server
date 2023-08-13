@@ -397,8 +397,11 @@ async def signin(userinfo: UserInfo):
                 cursor.execute(f"SELECT DISTINCT question_id FROM category_question WHERE category_id='{category_id[0]}';")
                 question_ids = [row[0] for row in cursor.fetchall()]
 
+                cursor.execute(f"SELECT category FROM categoreis WHERE id={category_id}")
+                category = cursor.fetchone()[0]
+
                 for question_id in question_ids:
-                    cursor.execute(f"SELECT question FROM questions WHERE category='{category.category}' AND question_id={question_id};")
+                    cursor.execute(f"SELECT question FROM questions WHERE category='{category}' AND question_id={question_id};")
                     questions.append(cursor.fetchone()[0])
 
             
