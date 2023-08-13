@@ -454,7 +454,7 @@ async def category(info: BusinessType):
             category_ids = []
             questions = []
             for category in categories:
-                category_id = cursor.execute(f"SELECT id FROM categories WHERE '{category}' = category;")
+                category_id = cursor.execute(f"SELECT id FROM categories WHERE '{category.category}' = category;")
                 category_id = cursor.fetchone()[0]  
                 insert_query = "INSERT INTO user_category (user_id, category_id) VALUES (%s, %s)"
                 cursor.execute(insert_query, (user_id, category_id))
