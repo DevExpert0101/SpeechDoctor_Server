@@ -451,24 +451,32 @@ async def category(info: BusinessType):
             cursor.execute("select database();")
             cursor.fetchone()
 
-            cursor.execute(f"SELECT id from userinfo WHERE {user_phone}=phone AND '{user_email}'=email")
-            user_id = cursor.fetchone()
-            
-            return {"result": "Sucessfully logged in", "user_id": user_id}
+            category_ids = []
+            questions = []
+            for category in categories:
+                category_id = cursor.execute(f"SELECT id FROM categories WHERE '{category}' = category;")
+                category_id = cursor.fetchone()[0]  
+                insert_query = "INSERT INTO user_category (user_id, category_id) VALUES (%s, %s)"
+                cursor.execute(insert_query, (user_id, category_id))
+                
+                connection.commit()
 
-            # for category in categories:
+                # query = "SELECT DISTINCT question_id FROM category_question WHERE category_id IN ({})".format(', '.join(map(str, category_ids)))
+                query = f"SELECT DISTINCT question_id FROM category_question WHERE category_id = '{category_id}'"
+                cursor.execute(query)
+                question_ids = [row[0] for row in cursor.fetchall()]
 
-            #     cursor.execute(f"SELECT id FROM categories WHERE '{category.category}'=category;")
-            #     category_id = cursor.fetchone()
+                print('question ids: ', question_ids)
 
-            #     cursor.execute(f"SELECT DISTINCT question_id FROM category_question WHERE category_id='{category_id[0]}';")
-            #     question_ids = [row[0] for row in cursor.fetchall()]
+                
+                for question_id in question_ids:
+                    print(category.category, ',', question_id)
+                    query = f"SELECT question FROM questions WHERE category='{category.category}' AND question_id={question_id};"
+                    cursor.execute(query)
+                    questions.append(cursor.fetchone()[0])
 
-            #     for question_id in question_ids:
-            #         cursor.execute(f"SELECT question FROM questions WHERE category='{category.category}' AND question_id={question_id};")
-            #         questions.append(cursor.fetchone()[0])
-
-            # return {"result": "Successfully logged in", "questions": questions}
+            print(questions)
+            return {"result":"Successfully registered categories", "quesitons": questions}
     except Error as e:
         print("Error while connecting to MYSQL :", e)
     
