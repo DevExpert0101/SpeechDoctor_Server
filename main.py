@@ -248,6 +248,9 @@ class Category(BaseModel):
 class UserInfo(BaseModel):
     phone: str
     email: str
+    # categories: List[Category]
+class BusinessType(BaseModel):
+    user_id: int
     categories: List[Category]
 
 
@@ -267,7 +270,7 @@ async def signup(userinfo: UserInfo):
         
         user_phone = userinfo.phone
         user_email = userinfo.email
-        categories = userinfo.categories
+        # categories = userinfo.categories
         # categories = [{"category":"Finance"}, {"category":"Engineering"}]
 
         if is_valid_email(user_email) == None:
@@ -310,42 +313,43 @@ async def signup(userinfo: UserInfo):
                 signup_rlt = cursor.execute(insert_query, values)
                 signup_rlt = connection.commit()
                 print('Successfully registered.')
-
-                user_id = cursor.execute(f"SELECT id From userinfo WHERE '{user_email}' = email;")
-                user_id = cursor.fetchone()
-                insert_query = "INSERT INTO user_category (user_id, category_id) VALUES (%s, %s)"
                 
-                category_ids = []
-                for category in categories:
+                return {"result":"Successfully registered."}
+                # user_id = cursor.execute(f"SELECT id From userinfo WHERE '{user_email}' = email;")
+                # user_id = cursor.fetchone()
+                # insert_query = "INSERT INTO user_category (user_id, category_id) VALUES (%s, %s)"
+                
+                # category_ids = []
+                # for category in categories:
                     
-                    category_id = cursor.execute(f"SELECT id FROM categories WHERE '{category.category}' = category;")
-                    category_id = cursor.fetchone()                    
-                    values = (user_id[0], category_id[0])
+                #     category_id = cursor.execute(f"SELECT id FROM categories WHERE '{category.category}' = category;")
+                #     category_id = cursor.fetchone()                    
+                #     values = (user_id[0], category_id[0])
 
-                    print(values)
+                #     print(values)
 
-                    category_ids.append(category_id[0])
+                #     category_ids.append(category_id[0])
 
-                    insert_category_rlt = cursor.execute(insert_query, values)
-                    insert_category_rlt = connection.commit()
+                #     insert_category_rlt = cursor.execute(insert_query, values)
+                #     insert_category_rlt = connection.commit()
 
                 
-                    # query = "SELECT DISTINCT question_id FROM category_question WHERE category_id IN ({})".format(', '.join(map(str, category_ids)))
-                    query = f"SELECT DISTINCT question_id FROM category_question WHERE category_id = '{category_id[0]}'"
-                    cursor.execute(query)
-                    question_ids = [row[0] for row in cursor.fetchall()]
+                #     # query = "SELECT DISTINCT question_id FROM category_question WHERE category_id IN ({})".format(', '.join(map(str, category_ids)))
+                #     query = f"SELECT DISTINCT question_id FROM category_question WHERE category_id = '{category_id[0]}'"
+                #     cursor.execute(query)
+                #     question_ids = [row[0] for row in cursor.fetchall()]
 
-                    print('question ids: ', question_ids)
+                #     print('question ids: ', question_ids)
 
                     
-                    for question_id in question_ids:
-                        print(category.category, ',', question_id)
-                        query = f"SELECT question FROM questions WHERE category='{category.category}' AND question_id={question_id};"
-                        cursor.execute(query)
-                        questions.append(cursor.fetchone()[0])
+                #     for question_id in question_ids:
+                #         print(category.category, ',', question_id)
+                #         query = f"SELECT question FROM questions WHERE category='{category.category}' AND question_id={question_id};"
+                #         cursor.execute(query)
+                #         questions.append(cursor.fetchone()[0])
 
-                print(questions)
-                return {"result":"Successfully registered", "quesitons": questions}
+                # print(questions)
+                # return {"result":"Successfully registered", "quesitons": questions}
             
     except Error as e:
         print("Error while connecting to MYSQL :", e)
@@ -361,7 +365,7 @@ async def signin(userinfo: UserInfo):
     try:
         user_phone = userinfo.phone
         user_email = userinfo.email
-        categories = userinfo.categories
+        # categories = userinfo.categories
 
         if is_valid_email(user_email) == None:
             return {"result":'Invalid email format.'}
@@ -383,13 +387,12 @@ async def signin(userinfo: UserInfo):
             cursor.execute(f"SELECT id from userinfo WHERE {user_phone}=phone AND '{user_email}'=email")
             user_id = cursor.fetchone()
 
+            cursor.execute(f"SELECT category_id FROM user_category WHERE {user_id}=user_id;")
+            category_ids = cursor.fetchall()
+
+
             questions = []
-
-
-            for category in categories:
-
-                cursor.execute(f"SELECT id FROM categories WHERE '{category.category}'=category;")
-                category_id = cursor.fetchone()
+            for category_id in category_ids:
 
                 cursor.execute(f"SELECT DISTINCT question_id FROM category_question WHERE category_id='{category_id[0]}';")
                 question_ids = [row[0] for row in cursor.fetchall()]
@@ -398,7 +401,22 @@ async def signin(userinfo: UserInfo):
                     cursor.execute(f"SELECT question FROM questions WHERE category='{category.category}' AND question_id={question_id};")
                     questions.append(cursor.fetchone()[0])
 
-            return {"result": "Successfully logged in", "questions": questions}
+            
+            return {"result": "Sucessfully logged in", "user_id": user_id, "questions": questions}
+
+            # for category in categories:
+
+            #     cursor.execute(f"SELECT id FROM categories WHERE '{category.category}'=category;")
+            #     category_id = cursor.fetchone()
+
+            #     cursor.execute(f"SELECT DISTINCT question_id FROM category_question WHERE category_id='{category_id[0]}';")
+            #     question_ids = [row[0] for row in cursor.fetchall()]
+
+            #     for question_id in question_ids:
+            #         cursor.execute(f"SELECT question FROM questions WHERE category='{category.category}' AND question_id={question_id};")
+            #         questions.append(cursor.fetchone()[0])
+
+            # return {"result": "Successfully logged in", "questions": questions}
     except Error as e:
         print("Error while connecting to MYSQL :", e)
     
@@ -408,3 +426,47 @@ async def signin(userinfo: UserInfo):
             connection.close()
             print("MySQL connection is closed")
     
+@app.post("/category/")
+async def category(info: BusinessType):
+    try:
+        user_id = info.user_id
+        categories = info.categories
+        # categories = userinfo.categories        
+
+        connection = mysql.connector.connect(host='private-db-mysql-nyc1-26789-do-user-9891847-0.b.db.ondigitalocean.com',
+                                             database='speechdoctordb',
+                                             user='doadmin',
+                                             password='AVNS_KlICjZwsR1t_bOfnX4V',
+                                             port='25060')       
+
+        if connection.is_connected():
+            cursor = connection.cursor(buffered=True)
+            cursor.execute("select database();")
+            cursor.fetchone()
+
+            cursor.execute(f"SELECT id from userinfo WHERE {user_phone}=phone AND '{user_email}'=email")
+            user_id = cursor.fetchone()
+            
+            return {"result": "Sucessfully logged in", "user_id": user_id}
+
+            # for category in categories:
+
+            #     cursor.execute(f"SELECT id FROM categories WHERE '{category.category}'=category;")
+            #     category_id = cursor.fetchone()
+
+            #     cursor.execute(f"SELECT DISTINCT question_id FROM category_question WHERE category_id='{category_id[0]}';")
+            #     question_ids = [row[0] for row in cursor.fetchall()]
+
+            #     for question_id in question_ids:
+            #         cursor.execute(f"SELECT question FROM questions WHERE category='{category.category}' AND question_id={question_id};")
+            #         questions.append(cursor.fetchone()[0])
+
+            # return {"result": "Successfully logged in", "questions": questions}
+    except Error as e:
+        print("Error while connecting to MYSQL :", e)
+    
+    finally:
+        if 'connection' in locals() and connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("MySQL connection is closed")
