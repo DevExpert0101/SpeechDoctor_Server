@@ -391,7 +391,7 @@ async def signin(userinfo: UserInfo):
                 cursor.execute(f"SELECT id FROM categories WHERE '{category.category}'=category;")
                 category_id = cursor.fetchone()
 
-                cursor.execute(f"SELECT DISTINCT question_id FROM category_question WHERE category_id='{category_id}';")
+                cursor.execute(f"SELECT DISTINCT question_id FROM category_question WHERE category_id='{category_id[0]}';")
                 question_ids = [row[0] for row in cursor.fetchall()]
 
                 for question_id in question_ids:
