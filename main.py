@@ -387,7 +387,7 @@ async def signin(userinfo: UserInfo):
             cursor.execute(f"SELECT id from userinfo WHERE {user_phone}=phone AND '{user_email}'=email")
             user_id = cursor.fetchone()
 
-            cursor.execute(f"SELECT category_id FROM user_category WHERE {user_id}=user_id;")
+            cursor.execute(f"SELECT category_id FROM user_category WHERE {user_id[0]}=user_id;")
             category_ids = cursor.fetchall()
 
 
