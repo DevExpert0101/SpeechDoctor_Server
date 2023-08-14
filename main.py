@@ -14,6 +14,7 @@ import datetime
 import mysql.connector
 from mysql.connector import Error
 import re
+import uvicorn
 
 
 # # available models = ['tiny.en', 'tiny', 'base.en', 'base', 'small.en', 'small', 'medium.en', 'medium', 'large-v1', 'large-v2', 'large']
@@ -388,28 +389,32 @@ async def signin(userinfo: UserInfo):
             user_id = cursor.fetchone()
             print('user_id', user_id)
 
-            cursor.execute(f"SELECT category_id FROM user_category WHERE {user_id[0]}=user_id;")
-            category_ids = cursor.fetchall()
-            print('category_ids', category_ids)
+            if user_id[0] >= 0:
+                cursor.execute(f"SELECT category_id FROM user_category WHERE {user_id[0]}=user_id;")
+                category_ids = cursor.fetchall()
+                print('category_ids', category_ids)
 
-            questions = []
-            for category_id in category_ids:
+                questions = []
+                for category_id in category_ids:
 
-                cursor.execute(f"SELECT DISTINCT question_id FROM category_question WHERE category_id='{category_id[0]}';")
-                question_ids = [row[0] for row in cursor.fetchall()]
-                print('question ids', question_ids)
+                    cursor.execute(f"SELECT DISTINCT question_id FROM category_question WHERE category_id='{category_id[0]}';")
+                    question_ids = [row[0] for row in cursor.fetchall()]
+                    print('question ids', question_ids)
 
-                cursor.execute(f"SELECT category FROM categories WHERE id={category_id[0]}")
-                category = cursor.fetchone()[0]
+                    cursor.execute(f"SELECT category FROM categories WHERE id={category_id[0]}")
+                    category = cursor.fetchone()[0]
 
-                print('category', category)
+                    print('category', category)
 
-                for question_id in question_ids:
-                    cursor.execute(f"SELECT question FROM questions WHERE category='{category}' AND question_id={question_id};")
-                    questions.append(cursor.fetchone()[0])
+                    for question_id in question_ids:
+                        cursor.execute(f"SELECT question FROM questions WHERE category='{category}' AND question_id={question_id};")
+                        questions.append(cursor.fetchone()[0])
 
+                
+                return {"result": "Sucessfully logged in", "user_id": user_id, "questions": questions}
             
-            return {"result": "Sucessfully logged in", "user_id": user_id, "questions": questions}
+            else:
+                return {"result": "User email or phone number is incorrect!"}
 
             # for category in categories:
 

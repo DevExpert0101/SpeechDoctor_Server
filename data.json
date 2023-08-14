@@ -1,4 +1,30 @@
 {
-  "phone": "1234567846",
-  "email": "galaxy46@gmail.com"
+  "California": {
+    "name": "EmilySmith",
+    "age": 25,
+    "house": "California",
+    "country": "USA",
+    "wand": {
+      "wood": "Maple",
+      "core": "Unicornhair",
+      "length": 12
+    },
+    "friends": [
+      {
+        "name": "Alice",
+        "age": 24,
+        "house": "Florida",
+        "wand": {
+          "wood": "",
+          "core": "",
+          "length": null
+        },
+        "occupation": "nurse"
+      }
+    ],
+    "enermies": [
+      "Eve"
+    ],
+    "patronus": "Dolphin"
+  }
 }
