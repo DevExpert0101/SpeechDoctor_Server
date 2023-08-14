@@ -274,9 +274,9 @@ async def signup(userinfo: UserInfo):
         # categories = [{"category":"Finance"}, {"category":"Engineering"}]
 
         if is_valid_email(user_email) == None:
-            return 'Invalid email format.'
+            return {"result": 'Invalid email format.'}
         elif is_valid_phone(user_phone) == None:
-            return 'Invalid phone number format'
+            return {"result":'Invalid phone number format'}
         
 
         connection = mysql.connector.connect(host='private-db-mysql-nyc1-26789-do-user-9891847-0.b.db.ondigitalocean.com',
