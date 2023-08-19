@@ -31,3 +31,10 @@ Name : SpeechDoctorDB
 user : root
 
 Tables : Category(id, category), Category_Question(category_id, question_id), UserInfo(id, phone, email), User_Category(user_id, category_id)
+
+
+#Mockai117526
+whatsyupp@gmail.com
+
+
+## MongoDB pass : n6hT4kH79i80x51Q, au82YZP4T50e1D39

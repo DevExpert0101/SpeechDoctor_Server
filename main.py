@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, Request
+from fastapi import FastAPI, File, UploadFile, Request, Form
 from pydantic import BaseModel
 from typing import List
 from pydub import AudioSegment
@@ -15,6 +15,10 @@ import mysql.connector
 from mysql.connector import Error
 import re
 import uvicorn
+# from transformers import pipeline
+import pymongo
+import base64
+
 
 
 # available models = ['tiny.en', 'tiny', 'base.en', 'base', 'small.en', 'small', 'medium.en', 'medium', 'large-v1', 'large-v2', 'large']
@@ -24,6 +28,9 @@ model_path = "vosk-model-en-us-0.22"
 model_vosk = Model(model_path) 
 filter_words = ['well','oh', 'um' 'er' ,'ah', 'uh', 'hmm', 'like', 'actually', 'basically', 'seriously', 'literally', 'totally', 'clearly', 'you see', 'you know'
     , 'i mean', 'you know what I mean','yeah', 'at the end of the day', 'believe me', 'i guess' , 'i suppose', 'or something', 'okay' , 'so', 'right' , 'hmm' , 'uh' ,'huh']
+
+sentiment_model_name = "distilbert-base-uncased-finetuned-sst-2-english"
+# sentiment_analysis = pipeline("sentiment-analysis", model=sentiment_model_name)
 
 
 print('Server is started ...')
@@ -57,6 +64,8 @@ class AudioProcessResult(BaseModel):
     filename: str
     duration_seconds: float  # You can add more fields depending on the processing you want to do
 
+
+
 def process_audio(folder_path: str, file_name: str):
     
     start_ = time.time()    
@@ -66,6 +75,9 @@ def process_audio(folder_path: str, file_name: str):
     src = folder_path + "/" + file_name
     dst = folder_path + "/" + file_name.replace('m4a', 'wav')
     sound = AudioSegment.from_file(src)
+
+    length_seconds = len(sound) / 1000    
+
     sound.export(dst, format="wav")
 
     # Load the original audio file
@@ -166,11 +178,6 @@ def process_audio(folder_path: str, file_name: str):
 
     print(json_words)     
 
-    word_num = len(list_of_Words)
-    json_words = []
-    for word in list_of_Words:
-        # print(word.to_string())
-        json_words.append({'start': word.start, 'end': word.end, 'word': word.word})
 
     print("The number of words is : ", len(json_words))
 
@@ -183,7 +190,8 @@ def process_audio(folder_path: str, file_name: str):
         word = list_of_Words[i]
         next_word = list_of_Words[i + 1]
         if word.end < next_word.start - 0.5:
-            pause.append({'start': word.end, 'end': next_word.start})
+            # pause.append({'start': word.end, 'end': next_word.start})
+            pause.append(word.start)
 
     num_pause = len(pause)
     print("The number of puases is : ", len(pause))
@@ -200,7 +208,8 @@ def process_audio(folder_path: str, file_name: str):
         w = word.to_string().split()
         if w[0].lower() in filter_words:
             print(word.to_string())
-            filtered_words.append({'start': word.start, 'end': word.end, 'filtered_word': word.word})
+            # filtered_words.append({'start': word.start, 'end': word.end, 'filtered_word': word.word})
+            filtered_words.append({"word": word, "timestamp": word.start})
 
     num_filtered_words = len(filtered_words)
     print("The number of filtered words : ", num_filtered_words)
@@ -213,34 +222,100 @@ def process_audio(folder_path: str, file_name: str):
 
     end_ = time.time() - start_
     print("--- %s seconds ---" % end_)
+        
     
-    return json_sentence_data, json_words, json_pause_data, json_filtered_data, end_
+    # return json_sentence_data, json_words, json_pause_data, json_filtered_data, end_
+    return length_seconds, word_num//length_seconds , pause, filtered_words
+
+class UploadAudioInfo(BaseModel):
+    audio_file: str
+    user_id: int
+    category_id: int
+    question_id: int
+    # audio_file: UploadFile = File(...)
+    
+    file_name: str
+
+
 
 @app.post("/upload/audio/")
-async def upload_audio_file(file: UploadFile = File(...)):
+async def upload_audio(info: UploadAudioInfo):
+    
+    file =  info.audio_file
+    filename = info.file_name
+    user_id = info.user_id
+    category_id = info.category_id
+    question_id = info.question_id
+
+    
 
     c_directory = os.getcwd()
     
     c_year = str(datetime.date.today().year)
     c_date = str(datetime.date.today().month) + '-' + str(datetime.date.today().day)
     
-    folder_name = c_directory + f"/data/{c_year}/{c_date}/{file.filename.split('.')[0]}"
-    fname = folder_name + f"/{file.filename}"
+    folder_name = c_directory + f"/data/{c_year}/{c_date}/{filename.split('.')[0]}"
+    fname = folder_name + f"/{filename}"
 
     if not os.path.exists(folder_name):
         os.makedirs(folder_name)
     # Save the uploaded audio file to a temporary location
 
+    print(file)
     with open(fname, "wb") as buffer:
-        buffer.write(await file.read())    
+        # buffer.write(await file.read())    
+        buffer.write(base64.b64decode(file))
 
     # Process the uploaded audio file
-    sentence_json = process_audio(folder_name, file.filename)
+    audio_length, speed, pause, filtered_words = process_audio(folder_name, filename)
     
 
     # Return the processing result
     # return AudioProcessResult(filename=file.filename, duration_seconds=duration_seconds)
-    return sentence_json
+
+    # rv = {}
+    # rv['user_id'] = user_id
+    # rv['category_id'] = category_id
+    # rv['question_id'] = question_id
+    # rv['result'] = {}
+    # rv['result']['total_time'] = audio_length
+    # rv['result']['speed'] = speed
+    # rv['result']['pauses'] = pause
+    # rv['result']['filler words'] = filtered_words
+
+    rv = {
+        'user_id': user_id,
+        'category_id': category_id,
+        'question_id': question_id,
+        'result':{
+            'total time': audio_length,
+            'speed' : speed
+            # 'pauses': pause,
+            # 'filler words': filtered_words
+        }
+    }
+    try:
+        client = pymongo.MongoClient("mongodb+srv://doadmin:au82YZP4T50e1D39@db-mongodb-speechdoctor-26caefd4.mongo.ondigitalocean.com/admin?replicaSet=db-mongodb-speechdoctor&tls=true&authSource=admin")        
+
+        db = client.speechdoctor
+
+        data = db.savedresults
+        
+        print(rv)
+
+
+        data.insert_one(rv)
+    
+    except Exception as e:
+        print("Error while connecting to MongoDB :", e)
+    
+    finally:
+        if 'client' in locals():
+            client.close()
+            print("MongoDB connection is closed")
+
+    return rv
+    
 
 
 class Category(BaseModel):
@@ -490,3 +565,36 @@ async def category(info: BusinessType):
             cursor.close()
             connection.close()
             print("MySQL connection is closed")
+
+
+class C_Result(BaseModel):
+    userID: int
+    questionID: int
+    categoryID: int
+
+@app.post("/getResult/")
+async def category(info: C_Result):
+    try:
+
+        client = pymongo.MongoClient("mongodb+srv://doadmin:n6hT4kH79i80x51Q@db-mongodb-speechdoctor-26caefd4.mongo.ondigitalocean.com/speechdoctor?replicaSet=db-mongodb-speechdoctor&tls=true&authSource=admin")        
+
+        db = client.speechdoctor
+
+        data = db.savedresults
+        
+        user_id = info.userID
+        category_id = info.categoryID
+        question_id = info.questionID
+        print(user_id, category_id, question_id)
+        result = data.find_one({"user_id": user_id, "category_id": category_id, "question_id":question_id})
+        
+        return result['result']
+
+
+    except Error as e:
+        print("Error while connecting to MYSQL :", e)
+    
+    finally:
+        if 'client' in locals():
+            client.close()
+            print("MongoDB connection is closed")

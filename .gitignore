@@ -6,3 +6,9 @@ myenv/
 *.m4a
 data/
 *.json
+
+base64test.py
+database_test.py
+db.py
+put.txt
+sent.py
