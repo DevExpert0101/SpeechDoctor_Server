@@ -18,6 +18,7 @@ import uvicorn
 # from transformers import pipeline
 import pymongo
 import base64
+from os import path
 
 
 
@@ -225,7 +226,7 @@ def process_audio(folder_path: str, file_name: str):
         
     
     # return json_sentence_data, json_words, json_pause_data, json_filtered_data, end_
-    return length_seconds, word_num//length_seconds , pause, filtered_words
+    return length_seconds, word_num, pause, filtered_words
 
 class UploadAudioInfo(BaseModel):
     audio_file: str
@@ -235,6 +236,7 @@ class UploadAudioInfo(BaseModel):
     # audio_file: UploadFile = File(...)
     
     file_name: str
+    end_part: str
 
 
 
@@ -246,7 +248,7 @@ async def upload_audio(info: UploadAudioInfo):
     user_id = info.user_id
     category_id = info.category_id
     question_id = info.question_id
-
+    end_part = info.end_part
     
 
     c_directory = os.getcwd()
@@ -261,60 +263,104 @@ async def upload_audio(info: UploadAudioInfo):
         os.makedirs(folder_name)
     # Save the uploaded audio file to a temporary location
 
-    print(file)
+    # print(file)
     with open(fname, "wb") as buffer:
         # buffer.write(await file.read())    
         buffer.write(base64.b64decode(file))
 
     # Process the uploaded audio file
-    audio_length, speed, pause, filtered_words = process_audio(folder_name, filename)
+    audio_length, words_num, pause, filtered_words = process_audio(folder_name, filename)
     
-
-    # Return the processing result
-    # return AudioProcessResult(filename=file.filename, duration_seconds=duration_seconds)
-
-    # rv = {}
-    # rv['user_id'] = user_id
-    # rv['category_id'] = category_id
-    # rv['question_id'] = question_id
-    # rv['result'] = {}
-    # rv['result']['total_time'] = audio_length
-    # rv['result']['speed'] = speed
-    # rv['result']['pauses'] = pause
-    # rv['result']['filler words'] = filtered_words
-
-    rv = {
+    rv = [{
         'user_id': user_id,
         'category_id': category_id,
         'question_id': question_id,
         'result':{
             'total time': audio_length,
-            'speed' : speed
-            # 'pauses': pause,
-            # 'filler words': filtered_words
+            'words num' : words_num,
+            'pauses': pause,
+            'filler words': filtered_words
         }
-    }
+    }]
     try:
-        client = pymongo.MongoClient("mongodb+srv://doadmin:au82YZP4T50e1D39@db-mongodb-speechdoctor-26caefd4.mongo.ondigitalocean.com/admin?replicaSet=db-mongodb-speechdoctor&tls=true&authSource=admin")        
 
-        db = client.speechdoctor
-
-        data = db.savedresults
+        json_file = 'data/' + filename + '.json'
         
-        print(rv)
+        if path.isfile(json_file) is False:
+            with open(json_file, 'w') as file:
+                file.write(json.dumps(rv))
+            return rv[0]
 
+        listObj = []
 
-        data.insert_one(rv)
+        # with open('data/' + filename + '.json', 'a') as file:
+        #     file.write(json.dumps(rv))
+        
+        with open(json_file) as file:
+            listObj = json.load(file)
+            listObj.append(rv[0])
+            print(listObj)
+        
+        with open(json_file, 'w') as file:
+            json.dump(listObj, file)
+            # file.write(json.dumps(listObj))
+
+        if end_part == "True":
+
+            print('='*10)
+
+            t_time = 0
+            t_wordnum = 0
+            t_pauses = []
+            t_fillerwords = []
+        
+            with open(json_file) as file:
+                listObj = json.load(file)
+                
+                for i in range(len(listObj)):
+                    t_time += listObj[i]['result']['total time']
+                    t_wordnum += listObj[i]['result']['words num']
+                    if listObj[i]['result']['pauses'] != []:
+                        t_pauses.append(listObj[i]['result']['pauses'])
+                    if listObj[i]['result']['filler words'] != []:
+                        t_fillerwords.append(listObj[i]['result']['filler words'])
+
+            os.remove(json_file)
+
+            end_rv = {
+                    'user_id': user_id,
+                    'category_id': category_id,
+                    'question_id': question_id,
+                    'result':{
+                        'total time': t_time,
+                        'words num' : t_wordnum,
+                        'pauses': t_pauses,
+                        'filler words': t_fillerwords
+                    }
+                }
+            
+            client = pymongo.MongoClient("mongodb+srv://doadmin:78O3ab9g6kL14oA5@db-mongodb-speechdoctor-26caefd4.mongo.ondigitalocean.com/speechdoctor?tls=true&authSource=admin&replicaSet=db-mongodb-speechdoctor")            
+
+            db = client.speechdoctor
+
+            data = db.savedresults
+
+            print(end_rv)
+            data.insert_one(end_rv)
+            
+            return end_rv
+                
+
     
     except Exception as e:
         print("Error while connecting to MongoDB :", e)
     
     finally:
         if 'client' in locals():
-            client.close()
+            # client.close()
             print("MongoDB connection is closed")
 
-    return rv
+    return rv[0]
     
 
 
@@ -576,7 +622,7 @@ class C_Result(BaseModel):
 async def category(info: C_Result):
     try:
 
-        client = pymongo.MongoClient("mongodb+srv://doadmin:n6hT4kH79i80x51Q@db-mongodb-speechdoctor-26caefd4.mongo.ondigitalocean.com/speechdoctor?replicaSet=db-mongodb-speechdoctor&tls=true&authSource=admin")        
+        client = pymongo.MongoClient("mongodb+srv://doadmin:78O3ab9g6kL14oA5@db-mongodb-speechdoctor-26caefd4.mongo.ondigitalocean.com/speechdoctor?tls=true&authSource=admin&replicaSet=db-mongodb-speechdoctor")        
 
         db = client.speechdoctor
 
