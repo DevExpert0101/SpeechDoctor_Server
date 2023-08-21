@@ -19,7 +19,7 @@ import uvicorn
 import pymongo
 import base64
 from os import path
-
+from fastapi.encoders import jsonable_encoder
 
 
 # available models = ['tiny.en', 'tiny', 'base.en', 'base', 'small.en', 'small', 'medium.en', 'medium', 'large-v1', 'large-v2', 'large']
@@ -230,9 +230,9 @@ def process_audio(folder_path: str, file_name: str):
 
 class UploadAudioInfo(BaseModel):
     audio_file: str
-    user_id: int
-    category_id: int
-    question_id: int
+    user_id: str
+    category_id: str
+    question_id: str
     # audio_file: UploadFile = File(...)
     
     file_name: str
@@ -346,7 +346,7 @@ async def upload_audio(info: UploadAudioInfo):
             data = db.savedresults
 
             print(end_rv)
-            data.insert_one(end_rv)
+            data.insert_one(jsonable_encoder(end_rv))
             
             return end_rv
                 
