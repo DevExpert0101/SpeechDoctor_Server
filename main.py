@@ -230,9 +230,9 @@ def process_audio(folder_path: str, file_name: str):
 
 class UploadAudioInfo(BaseModel):
     audio_file: str
-    user_id: str
-    category_id: str
-    question_id: str
+    user_id: int
+    category_id: int
+    question_id: int
     # audio_file: UploadFile = File(...)
     
     file_name: str
@@ -346,7 +346,12 @@ async def upload_audio(info: UploadAudioInfo):
             data = db.savedresults
 
             print(end_rv)
-            data.insert_one(jsonable_encoder(end_rv))
+
+            find_rlt = data.find_one({'user_id': user_id, 'category_id': category_id, 'question_id': question_id})
+            if find_rlt is not None:
+                data.update_one({'user_id': user_id, 'category_id': category_id, 'question_id': question_id}, {"$set" : end_rv})
+            else:
+                data.insert_one(jsonable_encoder(end_rv))
             
             return end_rv
                 
