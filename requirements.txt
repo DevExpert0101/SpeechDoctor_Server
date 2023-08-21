@@ -7,3 +7,4 @@ soundfile
 scipy
 python-multipart
 mysql-connector-python
+pymongo
