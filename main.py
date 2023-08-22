@@ -339,7 +339,7 @@ async def upload_audio(info: UploadAudioInfo):
                     }
                 }
             
-            client = pymongo.MongoClient("mongodb+srv://doadmin:4Pav3lyWJ0C56179@db-mongodb-speechdoctor-26caefd4.mongo.ondigitalocean.com/speechdoctor?tls=true&authSource=admin&replicaSet=db-mongodb-speechdoctor")            
+            client = pymongo.MongoClient("mongodb+srv://doadmin:O832S6rX05R14mNV@db-mongodb-speechdoctor-26caefd4.mongo.ondigitalocean.com/speechdoctor?tls=true&authSource=admin&replicaSet=db-mongodb-speechdoctor")            
 
             db = client.speechdoctor
 
@@ -629,7 +629,7 @@ class C_Result(BaseModel):
 async def category(info: C_Result):
     try:
 
-        client = pymongo.MongoClient("mongodb+srv://doadmin:4Pav3lyWJ0C56179@db-mongodb-speechdoctor-26caefd4.mongo.ondigitalocean.com/speechdoctor?tls=true&authSource=admin&replicaSet=db-mongodb-speechdoctor")        
+        client = pymongo.MongoClient("mongodb+srv://doadmin:O832S6rX05R14mNV@db-mongodb-speechdoctor-26caefd4.mongo.ondigitalocean.com/speechdoctor?tls=true&authSource=admin&replicaSet=db-mongodb-speechdoctor")        
 
         db = client.speechdoctor
 
