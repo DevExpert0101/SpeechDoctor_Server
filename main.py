@@ -339,7 +339,7 @@ async def upload_audio(info: UploadAudioInfo):
                     }
                 }
             
-            client = pymongo.MongoClient("mongodb+srv://doadmin:S0X2dP1YC748U9F5@db-mongodb-speechdoctor-26caefd4.mongo.ondigitalocean.com/admin?replicaSet=db-mongodb-speechdoctor&tls=true&authSource=admin")            
+            client = pymongo.MongoClient("mongodb+srv://doadmin:4Pav3lyWJ0C56179@db-mongodb-speechdoctor-26caefd4.mongo.ondigitalocean.com/speechdoctor?tls=true&authSource=admin&replicaSet=db-mongodb-speechdoctor")            
 
             db = client.speechdoctor
 
@@ -521,6 +521,7 @@ async def signin(userinfo: UserInfo):
                 print('category_ids', category_ids)
 
                 questions = []
+                cat_ques = []                
                 for category_id in category_ids:
 
                     cursor.execute(f"SELECT DISTINCT question_id FROM category_question WHERE category_id='{category_id[0]}';")
@@ -535,9 +536,10 @@ async def signin(userinfo: UserInfo):
                     for question_id in question_ids:
                         cursor.execute(f"SELECT question FROM questions WHERE category='{category}' AND question_id={question_id};")
                         questions.append(cursor.fetchone()[0])
+                        cat_ques.append((category_id[0], question_id))
 
                 
-                return {"result": "Sucessfully logged in", "user_id": user_id, "questions": questions}
+                return {"result": "Sucessfully logged in", "user_id": user_id, "cat_ques_ids": cat_ques, "questions": questions}
             
             else:
                 return {"result": "User email or phone number is incorrect!"}
@@ -627,7 +629,7 @@ class C_Result(BaseModel):
 async def category(info: C_Result):
     try:
 
-        client = pymongo.MongoClient("mongodb+srv://doadmin:S0X2dP1YC748U9F5@db-mongodb-speechdoctor-26caefd4.mongo.ondigitalocean.com/admin?replicaSet=db-mongodb-speechdoctor&tls=true&authSource=admin")        
+        client = pymongo.MongoClient("mongodb+srv://doadmin:4Pav3lyWJ0C56179@db-mongodb-speechdoctor-26caefd4.mongo.ondigitalocean.com/speechdoctor?tls=true&authSource=admin&replicaSet=db-mongodb-speechdoctor")        
 
         db = client.speechdoctor
 
