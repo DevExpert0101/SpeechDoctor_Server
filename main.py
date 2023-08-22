@@ -350,11 +350,11 @@ async def upload_audio(info: UploadAudioInfo):
 
             print(end_rv)
 
-            find_rlt = data.find_one({'user_id': user_id, 'category_id': category_id, 'question_id': question_id})
-            if find_rlt is not None:
-                data.update_one({'user_id': user_id, 'category_id': category_id, 'question_id': question_id}, {"$set" : end_rv})
-            else:
-                data.insert_one(jsonable_encoder(end_rv))
+            # find_rlt = data.find_one({'user_id': user_id, 'category_id': category_id, 'question_id': question_id})
+            # if find_rlt is not None:
+            #     data.update_one({'user_id': user_id, 'category_id': category_id, 'question_id': question_id}, {"$set" : end_rv})
+            # else:
+            #     data.insert_one(jsonable_encoder(end_rv))
             
             return end_rv
                 
