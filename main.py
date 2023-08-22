@@ -264,10 +264,13 @@ async def upload_audio(info: UploadAudioInfo):
     # Save the uploaded audio file to a temporary location
 
     # print(file)
+
+    start_decode = time.time()
     with open(fname, "wb") as buffer:
         # buffer.write(await file.read())    
         buffer.write(base64.b64decode(file))
 
+    print('Decode took %s seconds ...', time.time() - start_decode)
     # Process the uploaded audio file
     audio_length, words_num, pause, filtered_words = process_audio(folder_name, filename)
     
