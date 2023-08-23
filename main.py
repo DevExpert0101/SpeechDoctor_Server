@@ -310,25 +310,25 @@ async def upload_audio(info: UploadAudioInfo):
     try:
 
         json_file = 'data/' + filename + '.json'
-        
+        listObj = []
         if path.isfile(json_file) is False:
             with open(json_file, 'w') as file:
                 file.write(json.dumps(rv))
-            return rv[0]
+            
 
-        listObj = []
+        
 
         # with open('data/' + filename + '.json', 'a') as file:
         #     file.write(json.dumps(rv))
-        
-        with open(json_file) as file:
-            listObj = json.load(file)
-            listObj.append(rv[0])
-            print(listObj)
-        
-        with open(json_file, 'w') as file:
-            json.dump(listObj, file)
-            # file.write(json.dumps(listObj))
+        else:
+            with open(json_file) as file:
+                listObj = json.load(file)
+                listObj.append(rv[0])
+                print(listObj)
+            
+            with open(json_file, 'w') as file:
+                json.dump(listObj, file)
+                # file.write(json.dumps(listObj))
 
         if end_part == "True":
 
