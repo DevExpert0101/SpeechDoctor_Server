@@ -80,8 +80,8 @@ def process_audio(folder_path: str, file_name: str):
     end_ = time.time() - start_
     print("1--- %s seconds ---" % end_)
         
-    # length_seconds = len(sound) / 1000    
-    length_seconds  = 100
+    length_seconds = len(sound) / 1000    
+    
 
     sound.export(dst, format="wav")
 
