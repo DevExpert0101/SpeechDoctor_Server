@@ -247,7 +247,7 @@ def process_audio(folder_path: str, file_name: str):
         
     
     # return json_sentence_data, json_words, json_pause_data, json_filtered_data, end_
-    return length_seconds, word_num, pause, filtered_words, sentiment
+    return length_seconds, word_num, pause, filtered_words, sentiment[0]['label']
 
 class UploadAudioInfo(BaseModel):
     audio_file: str
