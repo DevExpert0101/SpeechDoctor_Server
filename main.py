@@ -231,7 +231,7 @@ def process_audio(folder_path: str, file_name: str):
         if w[0].lower() in filter_words:
             print(word.to_string())
             # filtered_words.append({'start': word.start, 'end': word.end, 'filtered_word': word.word})
-            filtered_words.append({"word": word, "timestamp": word.start})
+            filtered_words.append({"word": word.word, "timestamp": word.start})
 
     num_filtered_words = len(filtered_words)
     print("The number of filtered words : ", num_filtered_words)
