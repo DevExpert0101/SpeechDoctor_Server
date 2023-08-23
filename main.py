@@ -270,14 +270,14 @@ async def upload_audio(info: UploadAudioInfo):
     category_id = info.category_id
     question_id = info.question_id
     end_part = info.end_part
-    
+    filename = str(user_id) + "_" + str(category_id) + "_" + str(question_id)
 
     c_directory = os.getcwd()
     
     c_year = str(datetime.date.today().year)
     c_date = str(datetime.date.today().month) + '-' + str(datetime.date.today().day)
     
-    folder_name = c_directory + f"/data/{c_year}/{c_date}/{filename.split('.')[0]}"
+    folder_name = c_directory + f"/data/{c_year}/{c_date}/{filename}"
     fname = folder_name + f"/{filename}"
 
     if not os.path.exists(folder_name):
