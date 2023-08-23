@@ -670,7 +670,7 @@ async def category(info: C_Result):
         if result is not None:
             return result['result']
         else:
-            return ""
+            return "No"
 
 
     except Error as e:
