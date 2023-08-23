@@ -15,7 +15,7 @@ import mysql.connector
 from mysql.connector import Error
 import re
 import uvicorn
-# from transformers import pipeline
+from transformers import pipeline
 import pymongo
 import base64
 from os import path
