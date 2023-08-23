@@ -27,7 +27,7 @@ model = whisper.load_model("small.en")
 
 model_path = "vosk-model-en-us-0.22"
 model_vosk = Model(model_path) 
-filter_words = ['well','oh', 'um' 'er' ,'ah', 'uh', 'hmm', 'like', 'actually', 'basically', 'seriously', 'literally', 'totally', 'clearly', 'you see', 'you know'
+filter_words = ['well','oh', 'um', 'umm', 'mmm', 'er' ,'ah', 'uh', 'hmm', 'like', 'actually', 'basically', 'seriously', 'literally', 'totally', 'clearly', 'you see', 'you know'
     , 'i mean', 'you know what I mean','yeah', 'at the end of the day', 'believe me', 'i guess' , 'i suppose', 'or something', 'okay' , 'so', 'right' , 'hmm' , 'uh' ,'huh']
 
 sentiment_model_name = "distilbert-base-uncased-finetuned-sst-2-english"
