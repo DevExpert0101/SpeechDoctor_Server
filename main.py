@@ -31,7 +31,7 @@ filter_words = ['well','oh', 'um' 'er' ,'ah', 'uh', 'hmm', 'like', 'actually', '
     , 'i mean', 'you know what I mean','yeah', 'at the end of the day', 'believe me', 'i guess' , 'i suppose', 'or something', 'okay' , 'so', 'right' , 'hmm' , 'uh' ,'huh']
 
 sentiment_model_name = "distilbert-base-uncased-finetuned-sst-2-english"
-# sentiment_analysis = pipeline("sentiment-analysis", model=sentiment_model_name)
+sentiment_analysis = pipeline("sentiment-analysis", model=sentiment_model_name)
 
 
 print('Server is started ...')
@@ -111,6 +111,9 @@ def process_audio(folder_path: str, file_name: str):
     print("3--- %s seconds ---" % end_)
         
     result = model.transcribe(folder_path + "/" + fname + "_resampled_mono.wav")
+
+    sentiment = sentiment_analysis(result['text'])
+    print('Sentiment : ', sentiment[0]['label'])
 
     end_ = time.time() - start_
     print("4--- %s seconds ---" % end_)
