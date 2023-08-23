@@ -77,7 +77,11 @@ def process_audio(folder_path: str, file_name: str):
     dst = folder_path + "/" + file_name.replace('m4a', 'wav')
     sound = AudioSegment.from_file(src)
 
-    length_seconds = len(sound) / 1000    
+    end_ = time.time() - start_
+    print("1--- %s seconds ---" % end_)
+        
+    # length_seconds = len(sound) / 1000    
+    length_seconds  = 100
 
     sound.export(dst, format="wav")
 
@@ -92,7 +96,9 @@ def process_audio(folder_path: str, file_name: str):
 
     # Resample the audio to the target sample rate
     resampled_audio = scipy.signal.resample(audio, int(len(audio) * resampling_ratio))
-
+    end_ = time.time() - start_
+    print("2--- %s seconds ---" % end_)
+        
     # Save the resampled audio to a new file
     sf.write(folder_path + "/" + fname + "_resampled.wav", resampled_audio, target_sample_rate)
 
@@ -101,7 +107,14 @@ def process_audio(folder_path: str, file_name: str):
     sound = sound.set_channels(1)
     sound.export(folder_path + "/" + fname + "_resampled_mono.wav", format="wav")
 
+    end_ = time.time() - start_
+    print("3--- %s seconds ---" % end_)
+        
     result = model.transcribe(folder_path + "/" + fname + "_resampled_mono.wav")
+
+    end_ = time.time() - start_
+    print("4--- %s seconds ---" % end_)
+        
 
     print('*'*30)
     print(result['text'])
@@ -136,11 +149,16 @@ def process_audio(folder_path: str, file_name: str):
      
     audio_filename = folder_path + "/" + fname + "_resampled_mono.wav"
 
-
+    end_ = time.time() - start_
+    print("5--- %s seconds ---" % end_)
+        
     wf = wave.open(audio_filename, "rb")
     rec = KaldiRecognizer(model_vosk, wf.getframerate())
     rec.SetWords(True)
 
+    end_ = time.time() - start_
+    print("6--- %s seconds ---" % end_)
+        
     # get the list of JSON dictionaries
     results = []
 
