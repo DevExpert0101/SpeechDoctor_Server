@@ -247,7 +247,7 @@ def process_audio(folder_path: str, file_name: str):
         
     
     # return json_sentence_data, json_words, json_pause_data, json_filtered_data, end_
-    return length_seconds, word_num, pause, filtered_words
+    return length_seconds, word_num, pause, filtered_words, sentiment
 
 class UploadAudioInfo(BaseModel):
     audio_file: str
@@ -293,12 +293,13 @@ async def upload_audio(info: UploadAudioInfo):
 
     print('Decode took %s seconds ...', time.time() - start_decode)
     # Process the uploaded audio file
-    audio_length, words_num, pause, filtered_words = process_audio(folder_name, filename)
+    audio_length, words_num, pause, filtered_words, sentiment = process_audio(folder_name, filename)
     
     rv = [{
         'user_id': user_id,
         'category_id': category_id,
         'question_id': question_id,
+        'sentiment': sentiment,
         'result':{
             'total time': audio_length,
             'words num' : words_num,
@@ -355,6 +356,7 @@ async def upload_audio(info: UploadAudioInfo):
                     'user_id': user_id,
                     'category_id': category_id,
                     'question_id': question_id,
+                    'sentiment': sentiment,
                     'result':{
                         'total time': t_time,
                         'words num' : t_wordnum,
