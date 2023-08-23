@@ -298,13 +298,13 @@ async def upload_audio(info: UploadAudioInfo):
     rv = [{
         'user_id': user_id,
         'category_id': category_id,
-        'question_id': question_id,
-        'sentiment': sentiment,
+        'question_id': question_id,        
         'result':{
             'total time': audio_length,
             'words num' : words_num,
             'pauses': pause,
-            'filler words': filtered_words
+            'filler words': filtered_words,
+            'sentiment': sentiment
         }
     }]
     try:
@@ -356,12 +356,13 @@ async def upload_audio(info: UploadAudioInfo):
                     'user_id': user_id,
                     'category_id': category_id,
                     'question_id': question_id,
-                    'sentiment': sentiment,
+                    
                     'result':{
                         'total time': t_time,
                         'words num' : t_wordnum,
                         'pauses': t_pauses,
-                        'filler words': t_fillerwords
+                        'filler words': t_fillerwords,
+                        'sentiment': sentiment
                     }
                 }
             
