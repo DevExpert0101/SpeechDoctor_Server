@@ -665,7 +665,10 @@ async def category(info: C_Result):
         print(user_id, category_id, question_id)
         result = data.find_one({"user_id": user_id, "category_id": category_id, "question_id":question_id})
         
-        return result['result']
+        if result is not None:
+            return result['result']
+        else:
+            return ""
 
 
     except Error as e:
