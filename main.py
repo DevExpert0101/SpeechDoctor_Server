@@ -278,7 +278,7 @@ async def upload_audio(info: UploadAudioInfo):
     c_date = str(datetime.date.today().month) + '-' + str(datetime.date.today().day)
     
     folder_name = c_directory + f"/data/{c_year}/{c_date}/{filename}"
-    fname = folder_name + f"/{filename}"
+    fname = folder_name + f"/{filename}" + ".m4a"
 
     if not os.path.exists(folder_name):
         os.makedirs(folder_name)
@@ -293,7 +293,7 @@ async def upload_audio(info: UploadAudioInfo):
 
     print('Decode took %s seconds ...', time.time() - start_decode)
     # Process the uploaded audio file
-    audio_length, words_num, pause, filtered_words, sentiment = process_audio(folder_name, filename)
+    audio_length, words_num, pause, filtered_words, sentiment = process_audio(folder_name, filename + ".m4a")
     
     rv = [{
         'user_id': user_id,
