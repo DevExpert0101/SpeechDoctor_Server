@@ -23,7 +23,7 @@ from fastapi.encoders import jsonable_encoder
 
 
 # available models = ['tiny.en', 'tiny', 'base.en', 'base', 'small.en', 'small', 'medium.en', 'medium', 'large-v1', 'large-v2', 'large']
-model = whisper.load_model("small")
+model = whisper.load_model("base")
 
 model_path = "vosk-model-en-us-0.22"
 model_vosk = Model(model_path) 
