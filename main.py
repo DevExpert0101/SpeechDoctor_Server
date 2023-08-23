@@ -358,8 +358,8 @@ async def upload_audio(info: UploadAudioInfo):
                     'question_id': question_id,
                     
                     'result':{
-                        'total time': t_time,
-                        'words num' : t_wordnum,
+                        'total time': round(t_time, 2),
+                        'speed' : round(t_wordnum / t_time * 60),
                         'pauses': t_pauses,
                         'filler words': t_fillerwords,
                         'sentiment': sentiment
