@@ -346,9 +346,9 @@ async def upload_audio(info: UploadAudioInfo):
                     t_time += listObj[i]['result']['total time']
                     t_wordnum += listObj[i]['result']['words num']
                     if listObj[i]['result']['pauses'] != []:
-                        t_pauses.append(listObj[i]['result']['pauses'])
+                        t_pauses += (listObj[i]['result']['pauses'])
                     if listObj[i]['result']['filler words'] != []:
-                        t_fillerwords.append(listObj[i]['result']['filler words'])
+                        t_fillerwords += (listObj[i]['result']['filler words'])
 
             os.remove(json_file)
 
